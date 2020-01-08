@@ -94,6 +94,52 @@ icebreaker_fw.hex: icebreaker_fw.elf
 icebreaker_fw.bin: icebreaker_fw.elf
 	$(CROSS)objcopy -O binary icebreaker_fw.elf icebreaker_fw.bin
 
+# ---- iCE40 Feather Board ----
+
+icefsim: ice40feather_tb.vvp ice40feather_fw.hex
+	vvp -N $< +firmware=ice40feather_fw.hex
+
+icefsynsim: ice40feather_syn_tb.vvp ice40feather_fw.hex
+	vvp -N $< +firmware=ice40feather_fw.hex
+
+ice40feather.json: ice40feather.v ice40up5k_spram.v spimemio.v simpleuart.v picosoc.v ../picorv32.v
+	yosys -ql ice40feather.log -p 'synth_ice40 -top ice40feather -json ice40feather.json' $^
+
+ice40feather_tb.vvp: ice40feather_tb.v ice40feather.v ice40up5k_spram.v spimemio.v simpleuart.v picosoc.v ../picorv32.v spiflash.v
+	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
+
+ice40feather_syn_tb.vvp: ice40feather_tb.v ice40feather_syn.v spiflash.v
+	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
+
+ice40feather_syn.v: ice40feather.json
+	yosys -p 'read_json ice40feather.json; write_verilog ice40feather_syn.v'
+
+ice40feather.asc: ice40feather.pcf ice40feather.json
+	nextpnr-ice40 --freq 13 --up5k --asc ice40feather.asc --pcf ice40feather.pcf --json ice40feather.json
+
+ice40feather.bin: ice40feather.asc
+	icetime -d up5k -c 12 -mtr ice40feather.rpt ice40feather.asc
+	icepack ice40feather.asc ice40feather.bin
+
+icefprog: ice40feather.bin ice40feather_fw.bin
+	iceprog ice40feather.bin
+	iceprog -o 1M ice40feather_fw.bin
+
+icefprog_fw: ice40feather_fw.bin
+	iceprog -o 1M ice40feather_fw.bin
+
+ice40feather_sections.lds: sections.lds
+	$(CROSS)cpp -P -DICE40FEATHER -o $@ $^
+
+ice40feather_fw.elf: ice40feather_sections.lds start.s firmware_feather.c
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s firmware_feather.c
+
+ice40feather_fw.hex: ice40feather_fw.elf
+	$(CROSS)objcopy -O verilog ice40feather_fw.elf ice40feather_fw.hex
+
+ice40feather_fw.bin: ice40feather_fw.elf
+	$(CROSS)objcopy -O binary ice40feather_fw.elf ice40feather_fw.bin
+
 # ---- Testbench for SPI Flash Model ----
 
 spiflash_tb: spiflash_tb.vvp firmware.hex
@@ -113,11 +159,16 @@ clean:
 	rm -f testbench.vvp testbench.vcd spiflash_tb.vvp spiflash_tb.vcd
 	rm -f hx8kdemo_fw.elf hx8kdemo_fw.hex hx8kdemo_fw.bin cmos.log
 	rm -f icebreaker_fw.elf icebreaker_fw.hex icebreaker_fw.bin
+	rm -f ice40feather_fw.elf ice40feather_fw.hex ice40feather_fw.bin
 	rm -f hx8kdemo.blif hx8kdemo.log hx8kdemo.asc hx8kdemo.rpt hx8kdemo.bin
 	rm -f hx8kdemo_syn.v hx8kdemo_syn_tb.vvp hx8kdemo_tb.vvp
 	rm -f icebreaker.json icebreaker.log icebreaker.asc icebreaker.rpt icebreaker.bin
 	rm -f icebreaker_syn.v icebreaker_syn_tb.vvp icebreaker_tb.vvp
+	rm -f ice40feather.json ice40feather.log ice40feather.asc ice40feather.rpt ice40feather.bin
+	rm -f ice40feather_syn.v ice40feather_syn_tb.vvp ice40feather_tb.vvp
 
 .PHONY: spiflash_tb clean
 .PHONY: hx8kprog hx8kprog_fw hx8ksim hx8ksynsim
 .PHONY: icebprog icebprog_fw icebsim icebsynsim
+.PHONY: icefprog icefprog_fw icefsim icefsynsim
+

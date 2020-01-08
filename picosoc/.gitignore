@@ -24,6 +24,18 @@
 /icebreaker_fw.hex
 /icebreaker_fw.bin
 /icebreaker_sections.lds
+/ice40feather.asc
+/ice40feather.bin
+/ice40feather.json
+/ice40feather.log
+/ice40feather.rpt
+/ice40feather_syn.v
+/ice40feather_syn_tb.vvp
+/ice40feather_tb.vvp
+/ice40feather_fw.elf
+/ice40feather_fw.hex
+/ice40feather_fw.bin
+/ice40feather_sections.lds
 /testbench.vcd
 /cmos.log
 
