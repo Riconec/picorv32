@@ -4,17 +4,29 @@
 #  define MEM_TOTAL 0x200 /* 2 KB */
 #elif ICE40FEATHER
 #  define MEM_TOTAL 0x20000 /* 128 KB */
+#  define ROM_SIZE 1024
 #else
 #  error "Set -DICEBREAKER or -DHX8KDEMO or even ICE40FEATHER when compiling firmware.c"
 #endif
 
 MEMORY
 {
+    ROM (rx)        : ORIGIN = 0x00200000, LENGTH = ROM_SIZE*16 /* 16KiB ROM */
     FLASH (rx)      : ORIGIN = 0x00100000, LENGTH = 0x400000 /* entire flash, 4 MiB */
     RAM (xrw)       : ORIGIN = 0x00000000, LENGTH = MEM_TOTAL
 }
 
 SECTIONS {
+    /* ROM bootloader here */
+    .rom_boot_sect :
+    {
+        . = ALIGN(4);
+        *(.text)           /* .text sections (code) */
+        *(.text*)          /* .text* sections (code) */
+        _erom = .;         /* define a global symbol at end of boot */
+    } > ROM
+
+
     /* The program code and other data goes into FLASH */
     .text :
     {
