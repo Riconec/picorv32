@@ -35,6 +35,7 @@
 /ice40feather_fw.elf
 /ice40feather_fw.hex
 /ice40feather_fw.bin
+/ice40feather_fw.lss
 /ice40feather_sections.lds
 /testbench.vcd
 /cmos.log
