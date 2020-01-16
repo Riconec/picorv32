@@ -101,9 +101,6 @@ module picosoc (
 	wire [3:0] mem_wstrb;
 	wire [31:0] mem_rdata;
 
-	wire spimem_ready;
-	wire [31:0] spimem_rdata;
-
 	reg ram_ready;
 	wire [31:0] ram_rdata;
 
@@ -112,9 +109,6 @@ module picosoc (
 	assign iomem_addr = mem_addr;
 	assign iomem_wdata = mem_wdata;
 
-	wire spimemio_cfgreg_sel = mem_valid && (mem_addr == 32'h 0200_0000);
-	wire [31:0] spimemio_cfgreg_do;
-
 	wire        simpleuart_reg_div_sel = mem_valid && (mem_addr == 32'h 0200_0004);
 	wire [31:0] simpleuart_reg_div_do;
 
@@ -122,11 +116,11 @@ module picosoc (
 	wire [31:0] simpleuart_reg_dat_do;
 	wire        simpleuart_reg_dat_wait;
 
-	assign mem_ready = (iomem_valid && iomem_ready) || spimem_ready || ram_ready || spimemio_cfgreg_sel ||
+	assign mem_ready = (iomem_valid && iomem_ready)  || ram_ready  ||
 			simpleuart_reg_div_sel || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait);
 
-	assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : spimem_ready ? spimem_rdata : ram_ready ? ram_rdata :
-			spimemio_cfgreg_sel ? spimemio_cfgreg_do : simpleuart_reg_div_sel ? simpleuart_reg_div_do :
+	assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : ram_ready ? ram_rdata :
+			simpleuart_reg_div_sel ? simpleuart_reg_div_do :
 			simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 32'h 0000_0000;
 
 	picorv32 #(
@@ -151,37 +145,6 @@ module picosoc (
 		.mem_wstrb   (mem_wstrb  ),
 		.mem_rdata   (mem_rdata  ),
 		.irq         (irq        )
-	);
-
-	spimemio spimemio (
-		.clk    (clk),
-		.resetn (resetn),
-		.valid  (mem_valid && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
-		.ready  (spimem_ready),
-		.addr   (mem_addr[23:0]),
-		.rdata  (spimem_rdata),
-
-		.flash_csb    (flash_csb   ),
-		.flash_clk    (flash_clk   ),
-
-		.flash_io0_oe (flash_io0_oe),
-		.flash_io1_oe (flash_io1_oe),
-		.flash_io2_oe (flash_io2_oe),
-		.flash_io3_oe (flash_io3_oe),
-
-		.flash_io0_do (flash_io0_do),
-		.flash_io1_do (flash_io1_do),
-		.flash_io2_do (flash_io2_do),
-		.flash_io3_do (flash_io3_do),
-
-		.flash_io0_di (flash_io0_di),
-		.flash_io1_di (flash_io1_di),
-		.flash_io2_di (flash_io2_di),
-		.flash_io3_di (flash_io3_di),
-
-		.cfgreg_we(spimemio_cfgreg_sel ? mem_wstrb : 4'b 0000),
-		.cfgreg_di(mem_wdata),
-		.cfgreg_do(spimemio_cfgreg_do)
 	);
 
 	simpleuart simpleuart (
