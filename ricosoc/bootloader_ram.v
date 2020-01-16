@@ -2,7 +2,7 @@
 
 module rom (clk, raddr, rdata);
     input clk;
-    input [7:0] raddr;
+    input [31:0] raddr;
     output [31:0] rdata;
 
     parameter ROM_FILE_NAME = "dummy.hex";
@@ -12,7 +12,7 @@ module rom (clk, raddr, rdata);
     ram #(.RAM_DATA_WIDTH(32),
           .RAM_ADDR_WIDTH(8),
           .ROM_FILE_NAME(ROM_FILE_NAME))
-          ram_inst1 (clk, 1'b0, 1'b1, 8'd0, raddr, 32'd0, rdata);
+    ram_inst1 (clk, 1'b0, 1'b1, RAM_ADDR_WIDTH'd0, raddr[RAM_ADDR_WIDTH-1:0], 32'd0, rdata);
 
 endmodule
 
