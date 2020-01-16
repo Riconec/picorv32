@@ -69,11 +69,6 @@ module testbench;
 		.MEM_WORDS(256)
 	) uut (
 		.clk      (clk      ),
-		.led1     (led1     ),
-		.led2     (led2     ),
-		.led3     (led3     ),
-		.led4     (led4     ),
-		.led5     (led5     ),
 		.ledr_n   (ledr_n   ),
 		.ledg_n   (ledg_n   ),
 		.ser_rx   (ser_rx   ),

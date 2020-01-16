@@ -11,22 +11,11 @@
 
 MEMORY
 {
-    ROM (rx)        : ORIGIN = 0x00200000, LENGTH = ROM_SIZE*16 /* 16KiB ROM */
     FLASH (rx)      : ORIGIN = 0x00100000, LENGTH = 0x400000 /* entire flash, 4 MiB */
     RAM (xrw)       : ORIGIN = 0x00000000, LENGTH = MEM_TOTAL
 }
 
 SECTIONS {
-    /* ROM bootloader here */
-    .rom_boot_sect :
-    {
-        . = ALIGN(4);
-        *(.text)           /* .text sections (code) */
-        *(.text*)          /* .text* sections (code) */
-        _erom = .;         /* define a global symbol at end of boot */
-    } > ROM
-
-
     /* The program code and other data goes into FLASH */
     .text :
     {
@@ -82,4 +71,5 @@ SECTIONS {
         . = ALIGN(4);
         _heap_start = .;    /* define a global symbol at heap start */
     } >RAM
+
 }

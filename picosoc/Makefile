@@ -96,7 +96,7 @@ icebreaker_fw.bin: icebreaker_fw.elf
 
 # ---- iCE40 Feather Board ----
 
-icefsim: ice40feather_tb.vvp ice40feather_fw.hex
+icefsim: ice40feather_tb.vvp ice40feather_fw.hex ice40feather_fw.lss
 	vvp -N $< +firmware=ice40feather_fw.hex
 
 icefsynsim: ice40feather_syn_tb.vvp ice40feather_fw.hex
@@ -131,13 +131,17 @@ icefprog_fw: ice40feather_fw.bin
 ice40feather_sections.lds: sections.lds
 	$(CROSS)cpp -P -DICE40FEATHER -o $@ $^
 
-ice40feather_fw.elf: ice40feather_sections.lds start.s firmware_feather.c
-	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s firmware_feather.c
+ice40feather_fw.elf: ice40feather_sections.lds start.s rom_boot.s firmware_feather.c
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s rom_boot.s firmware_feather.c
 
 ice40feather_fw.hex: ice40feather_fw.elf
 	$(CROSS)objcopy -O verilog ice40feather_fw.elf ice40feather_fw.hex
+	cp ice40feather_fw.hex firmware.hex
 
-ice40feather_fw.bin: ice40feather_fw.elf
+ice40feather_fw.lss: ice40feather_fw.elf
+	$(CROSS)objdump -S ice40feather_fw.elf >> ice40feather_fw.lss
+
+ice40feather_fw.bin: ice40feather_fw.elf ice40feather_fw.lss
 	$(CROSS)objcopy -O binary ice40feather_fw.elf ice40feather_fw.bin
 
 # ---- Testbench for SPI Flash Model ----
