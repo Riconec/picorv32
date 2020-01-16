@@ -70,24 +70,7 @@ module testbench;
 	) uut (
 		.clk      (clk      ),
 		.ledr_n   (ledr_n   ),
-		.ledg_n   (ledg_n   ),
-		.ser_rx   (ser_rx   ),
-		.ser_tx   (ser_tx   ),
-		.flash_csb(flash_csb),
-		.flash_clk(flash_clk),
-		.flash_io0(flash_io0),
-		.flash_io1(flash_io1),
-		.flash_io2(flash_io2),
-		.flash_io3(flash_io3)
-	);
-
-	spiflash spiflash (
-		.csb(flash_csb),
-		.clk(flash_clk),
-		.io0(flash_io0),
-		.io1(flash_io1),
-		.io2(flash_io2),
-		.io3(flash_io3)
+		.ledg_n   (ledg_n   )
 	);
 
 	reg [7:0] buffer;

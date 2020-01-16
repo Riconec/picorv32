@@ -3,11 +3,12 @@ CFLAGS=
 
 # ---- iCE40 Feather Board ----
 
-ice40feather_tb.vvp: ice40feather_tb.v ice40feather.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
+ice40feather_tb.vvp: ice40feather_tb.v ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
 	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
 
-icefsim: ice40feather_tb.vvp ice40feather_fw.hex ice40feather_fw.lss
-	vvp -N $< +firmware=ice40feather_fw.hex
+icefsim: ice40feather_tb.vvp #ice40feather_fw.hex ice40feather_fw.lss
+	vvp -N $< 
+	#+firmware=ice40feather_fw.hex
 
 
 icefsynsim: ice40feather_syn_tb.vvp ice40feather_fw.hex
@@ -20,11 +21,11 @@ ice40feather_syn.v: ice40feather.json
 	yosys -p 'read_json ice40feather.json; write_verilog ice40feather_syn.v'
 
 
-ice40feather.json: ice40feather.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
+ice40feather.json: ice40feather.v  bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
 	yosys -ql ice40feather.log -p 'synth_ice40 -top ice40feather -json ice40feather.json' $^
 
 ice40feather.asc: ice40feather.pcf ice40feather.json
-	nextpnr-ice40 --freq 13 --up5k --asc ice40feather.asc --pcf ice40feather.pcf --json ice40feather.json
+	nextpnr-ice40 --freq 13 --up5k --package sg48 --asc ice40feather.asc --pcf ice40feather.pcf --json ice40feather.json
 
 ice40feather.bin: ice40feather.asc
 	icetime -d up5k -c 12 -mtr ice40feather.rpt ice40feather.asc

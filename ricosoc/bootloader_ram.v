@@ -12,7 +12,7 @@ module rom (clk, raddr, rdata);
     ram #(.RAM_DATA_WIDTH(32),
           .RAM_ADDR_WIDTH(8),
           .ROM_FILE_NAME(ROM_FILE_NAME))
-    ram_inst1 (clk, 1'b0, 1'b1, RAM_ADDR_WIDTH'd0, raddr[RAM_ADDR_WIDTH-1:0], 32'd0, rdata);
+    ram_inst1 (clk, 1'b0, 1'b1, 32'd0, raddr[RAM_ADDR_WIDTH+1:2], 32'd0, rdata);
 
 endmodule
 

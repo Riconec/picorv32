@@ -27,18 +27,17 @@
 module ice40feather (
 	input clk,
 
-	output ser_tx,
-	input ser_rx,
-
 	output led_user,
 
 	output ledr_n,
 	output ledg_n,
-	output ledb_n,
+	output ledb_n
 
 );
 	parameter integer MEM_WORDS = 32768;
 
+// reset circutry to generate delay
+// for correct ram init and reset at all
 	reg [5:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;
 
@@ -86,9 +85,6 @@ module ice40feather (
 	) soc (
 		.clk          (clk         ),
 		.resetn       (resetn      ),
-
-		.ser_tx       (ser_tx      ),
-		.ser_rx       (ser_rx      ),
 
 		.irq_5        (1'b0        ),
 		.irq_6        (1'b0        ),

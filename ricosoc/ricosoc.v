@@ -33,6 +33,12 @@
 // design are read in the correct order.
 `define PICOSOC_V
 
+`define RAM_ADDR_START  32'h0000_0000
+`define RAM_ADDR_END    32'h00FF_FFFF+1'b1
+`define ROM_ADDR_START  32'h0100_0000
+`define ROM_ADDR_END    32'h01FF_FFFF+1'b1
+`define RICOSOC_EXTFLASH_START_ADDR     32'h0200_0000
+
 module ricosoc (
 	input clk,
 	input resetn,
@@ -46,10 +52,8 @@ module ricosoc (
 
 	input  irq_5,
 	input  irq_6,
-	input  irq_7,
+	input  irq_7
 
-	output ser_tx,
-	input  ser_rx,
 );
 	parameter [0:0] BARREL_SHIFTER = 1;
 	parameter [0:0] ENABLE_MULDIV = 1;
@@ -58,8 +62,8 @@ module ricosoc (
 	parameter [0:0] ENABLE_IRQ_QREGS = 0;
 
 	parameter integer MEM_WORDS = 256;
-	parameter [31:0] STACKADDR = (4*MEM_WORDS);       // end of memory
-	parameter [31:0] PROGADDR_RESET = 32'h 0010_0000; // 1 MB into flash
+	parameter [31:0] STACKADDR = (`RAM_ADDR_START +(4 * MEM_WORDS));       // end of ram
+	parameter [31:0] PROGADDR_RESET = `ROM_ADDR_START; // 1 MB into flash
 	parameter [31:0] PROGADDR_IRQ = 32'h 0000_0000;
 
 	reg [31:0] irq;
@@ -86,24 +90,39 @@ module ricosoc (
 	reg ram_ready;
 	wire [31:0] ram_rdata;
 
-	assign iomem_valid = mem_valid && (mem_addr[31:24] > 8'h 01);
+    reg rom_ready;
+	wire [31:0] rom_rdata;
+
+	always @(posedge clk)
+		ram_ready <= mem_valid && !mem_ready && (mem_addr < 4 * MEM_WORDS); //RAM_ADDR_END set actual define
+
+    always @(posedge clk)
+		rom_ready <= mem_valid && !mem_ready && (mem_addr < `ROM_ADDR_END); //4*MEM_WORDS; set actual size
+    
+    // External memory interface request valid only if address is outside ram and rom
+	assign iomem_valid = mem_valid && (mem_addr > `RICOSOC_EXTFLASH_START_ADDR);
 	assign iomem_wstrb = mem_wstrb;
 	assign iomem_addr = mem_addr;
 	assign iomem_wdata = mem_wdata;
 
+    // this won't work because it is in external address now :)
+    /*
 	wire        simpleuart_reg_div_sel = mem_valid && (mem_addr == 32'h 0200_0004);
 	wire [31:0] simpleuart_reg_div_do;
 
 	wire        simpleuart_reg_dat_sel = mem_valid && (mem_addr == 32'h 0200_0008);
 	wire [31:0] simpleuart_reg_dat_do;
 	wire        simpleuart_reg_dat_wait;
+    */
 
-	assign mem_ready = (iomem_valid && iomem_ready)  || ram_ready  ||
-			simpleuart_reg_div_sel || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait);
+	assign mem_ready = ram_ready  || rom_ready || (iomem_valid && iomem_ready);
+	//assign mem_ready = (iomem_valid && iomem_ready)  ||  ram_ready  || rom_ready;// ||
+			//simpleuart_reg_div_sel || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait);
 
-	assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : ram_ready ? ram_rdata :
-			simpleuart_reg_div_sel ? simpleuart_reg_div_do :
-			simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 32'h 0000_0000;
+	assign mem_rdata = ram_ready ? ram_rdata : rom_ready ? rom_rdata : (iomem_valid && iomem_ready) ? iomem_rdata : 32'h 0000_0000;
+	//assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : ram_ready ? ram_rdata : rom_ready ? rom_rdata : 32'h 0000_0000;
+			//simpleuart_reg_div_sel ? simpleuart_reg_div_do :
+			//simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 32'h 0000_0000;
 
 	picorv32 #(
 		.STACKADDR(STACKADDR),
@@ -128,7 +147,7 @@ module ricosoc (
 		.mem_rdata   (mem_rdata  ),
 		.irq         (irq        )
 	);
-
+/*
 	simpleuart simpleuart (
 		.clk         (clk         ),
 		.resetn      (resetn      ),
@@ -146,10 +165,7 @@ module ricosoc (
 		.reg_dat_do  (simpleuart_reg_dat_do),
 		.reg_dat_wait(simpleuart_reg_dat_wait)
 	);
-
-	always @(posedge clk)
-		ram_ready <= mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS;
-
+*/
 	`PICOSOC_MEM #(
 		.WORDS(MEM_WORDS)
 	) memory (
@@ -159,6 +175,16 @@ module ricosoc (
 		.wdata(mem_wdata),
 		.rdata(ram_rdata)
 	);
+
+    rom #(
+        .ROM_FILE_NAME("dummy.hex"),
+        .RAM_ADDR_WIDTH(8)
+    ) bootrom (
+        .clk(clk), 
+        .raddr(mem_addr),
+        .rdata(rom_rdata)
+    );
+
 endmodule
 
 // Implementation note:
