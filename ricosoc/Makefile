@@ -1,3 +1,6 @@
+CROSS=riscv32-unknown-elf-
+CFLAGS=
+
 bootloader_fw.elf: ice40feather_sections.lds rom_boot.s
 	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o bootloader_fw.elf rom_boot.s
 
