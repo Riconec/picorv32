@@ -9,11 +9,11 @@ module rom (clk, raddr, rdata);
     parameter RAM_DATA_WIDTH = 32;
     parameter RAM_ADDR_WIDTH = 8;
 
-    ram #(.RAM_DATA_WIDTH(32),
-          .RAM_ADDR_WIDTH(8),
+    ram #(.RAM_DATA_WIDTH(RAM_DATA_WIDTH),
+          .RAM_ADDR_WIDTH(RAM_ADDR_WIDTH),
           .ROM_FILE_NAME(ROM_FILE_NAME))
 
-    ram_inst1 (clk, 1'b0, 1'b1, 32'd0, raddr[RAM_ADDR_WIDTH+1:2], 32'd0, rdata);
+    ram_inst1 (clk, 1'b0, 1'b1, 32'd0, raddr[31:2], 32'd0, rdata);
 
 endmodule
 
@@ -28,8 +28,7 @@ module ram (clk, wen, ren, waddr, raddr, wdata, rdata);
     input [31:0] wdata;
     output reg [31:0] rdata;
     
-    reg [31:0] mem [0:255]; //here use RAM_NUM_WORDS
-
+    reg [31:0] mem [0:RAM_NUM_WORDS-1];
 
 `ifdef INITIALIZE_RAM
     initial $readmemh(ROM_FILE_NAME, mem);
