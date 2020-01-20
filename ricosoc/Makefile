@@ -1,15 +1,14 @@
 CROSS=riscv32-unknown-elf-
 CFLAGS=
+SRC_LIST= ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ../picosoc/spimemio.v ricosoc.v ../picorv32.v
 
 # ---- iCE40 Feather Board ----
 
-ice40feather_tb.vvp: ice40feather_tb.v ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
+ice40feather_tb.vvp: ice40feather_tb.v ../picosoc/spiflash.v $(SRC_LIST)
 	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
 
-icefsim: ice40feather_tb.vvp #ice40feather_fw.hex ice40feather_fw.lss
-	vvp -N $< 
-	#+firmware=ice40feather_fw.hex
-
+icefsim: ice40feather_tb.vvp bootloader_fw.hex bootloader_fw.hex ice40feather_fw.hex ice40feather_fw.lss
+	vvp -N $<
 
 icefsynsim: ice40feather_syn_tb.vvp ice40feather_fw.hex
 	vvp -N $< +firmware=ice40feather_fw.hex
@@ -21,7 +20,7 @@ ice40feather_syn.v: ice40feather.json
 	yosys -p 'read_json ice40feather.json; write_verilog ice40feather_syn.v'
 
 
-ice40feather.json: ice40feather.v  bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ricosoc.v ../picorv32.v
+ice40feather.json: $(SRC_LIST)
 	yosys -ql ice40feather.log -p 'synth_ice40 -top ice40feather -json ice40feather.json' $^
 
 ice40feather.asc: ice40feather.pcf ice40feather.json
@@ -44,8 +43,8 @@ icefprog_fw: ice40feather_fw.bin
 ice40feather_sections.lds: sections.lds
 	$(CROSS)cpp -P -DICE40FEATHER -o $@ $^
 
-ice40feather_fw.elf: ice40feather_sections.lds start.s rom_boot.s firmware_feather.c
-	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s rom_boot.s firmware_feather.c
+ice40feather_fw.elf: ice40feather_sections.lds start.s #rom_boot.s firmware_feather.c #rom_boot.s firmware_feather.c
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s 
 
 ice40feather_fw.hex: ice40feather_fw.elf
 	$(CROSS)objcopy -O verilog ice40feather_fw.elf ice40feather_fw.hex
@@ -57,17 +56,19 @@ ice40feather_fw.lss: ice40feather_fw.elf
 ice40feather_fw.bin: ice40feather_fw.elf ice40feather_fw.lss
 	$(CROSS)objcopy -O binary ice40feather_fw.elf ice40feather_fw.bin
 
-# bootloader part
+# bootloader fw part
 
-bootloader_fw.elf: ice40feather_sections.lds rom_boot.s
-	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o bootloader_fw.elf rom_boot.s
+bootloader_fw.elf: ice40feather_sections.lds bootrom.s
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o bootloader_fw.elf bootrom.s
 
 bootloader_fw.hex: bootloader_fw.elf
-	$(CROSS)objcopy -O verilog bootloader_fw.elf bootloader_fw.hex
+	elf2hex --bit-width 32 --input bootloader_fw.elf --output bootloader_fw.hex
 	$(CROSS)objdump -S bootloader_fw.elf >> bootloader_fw.lss
 
 bootloader_fw.lss: bootloader_fw.elf
 	$(CROSS)objdump -S bootloader_fw.elf >> bootloader_fw.lss
+
+# bootloader debug part
 
 bootloader_ram.bin: bootloader_ram.asc
 	icetime -d up5k -c 12 -mtr bootloader_ram.rpt bootloader_ram.asc

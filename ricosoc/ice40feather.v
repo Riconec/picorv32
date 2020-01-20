@@ -31,7 +31,15 @@ module ice40feather (
 
 	output ledr_n,
 	output ledg_n,
-	output ledb_n
+	output ledb_n,
+
+
+	output flash_csb,
+	output flash_clk,
+	inout  flash_io0,
+	inout  flash_io1,
+	inout  flash_io2,
+	inout  flash_io3
 
 );
 	parameter integer MEM_WORDS = 32768;
@@ -58,6 +66,16 @@ module ice40feather (
 	wire [31:0] iomem_addr;
 	wire [31:0] iomem_wdata;
 	reg  [31:0] iomem_rdata;
+
+	SB_IO #(
+		.PIN_TYPE(6'b 1010_01),
+		.PULLUP(1'b 0)
+	) flash_io_buf [3:0] (
+		.PACKAGE_PIN({flash_io3, flash_io2, flash_io1, flash_io0}),
+		.OUTPUT_ENABLE({flash_io3_oe, flash_io2_oe, flash_io1_oe, flash_io0_oe}),
+		.D_OUT_0({flash_io3_do, flash_io2_do, flash_io1_do, flash_io0_do}),
+		.D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
+	);
 
 	reg [31:0] gpio;
 	assign leds = gpio;
@@ -95,6 +113,24 @@ module ice40feather (
 		.iomem_wstrb  (iomem_wstrb ),
 		.iomem_addr   (iomem_addr  ),
 		.iomem_wdata  (iomem_wdata ),
-		.iomem_rdata  (iomem_rdata )
+		.iomem_rdata  (iomem_rdata ),
+
+		.flash_csb    (flash_csb   ),
+		.flash_clk    (flash_clk   ),
+
+		.flash_io0_oe (flash_io0_oe),
+		.flash_io1_oe (flash_io1_oe),
+		.flash_io2_oe (flash_io2_oe),
+		.flash_io3_oe (flash_io3_oe),
+
+		.flash_io0_do (flash_io0_do),
+		.flash_io1_do (flash_io1_do),
+		.flash_io2_do (flash_io2_do),
+		.flash_io3_do (flash_io3_do),
+
+		.flash_io0_di (flash_io0_di),
+		.flash_io1_di (flash_io1_di),
+		.flash_io2_di (flash_io2_di),
+		.flash_io3_di (flash_io3_di)
 	);
 endmodule

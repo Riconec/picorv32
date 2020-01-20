@@ -1,0 +1,52 @@
+[*]
+[*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
+[*] Sun Jan 19 18:01:21 2020
+[*]
+[dumpfile] "/home/rico/project/picorv32/ricosoc/testbench.vcd"
+[dumpfile_mtime] "Sun Jan 19 17:59:19 2020"
+[dumpfile_size] 117189440
+[savefile] "/home/rico/project/picorv32/ricosoc/ricosoc.gtkw"
+[timestart] 0
+[size] 1920 1014
+[pos] -920 -413
+*-20.000000 1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[treeopen] testbench.uut.
+[treeopen] testbench.uut.soc.
+[sst_width] 207
+[signals_width] 295
+[sst_expanded] 1
+[sst_vpaned_height] 294
+@28
+testbench.uut.clk
+testbench.uut.flash_clk
+testbench.uut.flash_csb
+testbench.uut.flash_io0
+testbench.uut.flash_io1
+testbench.uut.flash_io2
+testbench.uut.flash_io3
+@22
+testbench.uut.soc.mem_addr[31:0]
+@28
+testbench.uut.soc.mem_instr
+@22
+testbench.uut.soc.mem_rdata[31:0]
+@28
+testbench.uut.soc.mem_ready
+testbench.uut.soc.mem_valid
+@22
+testbench.uut.soc.mem_wdata[31:0]
+testbench.uut.soc.mem_wstrb[3:0]
+testbench.uut.soc.ram_rdata[31:0]
+@28
+testbench.uut.soc.ram_ready
+@22
+testbench.uut.soc.rom_rdata[31:0]
+@28
+testbench.uut.soc.rom_ready
+@22
+testbench.uut.soc.spimem_rdata[31:0]
+@28
+testbench.uut.soc.spimem_ready
+[pattern_trace] 1
+[pattern_trace] 0

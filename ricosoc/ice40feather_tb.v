@@ -24,11 +24,22 @@ module testbench;
 	always #5 clk = (clk === 1'b0);
 
 	localparam ser_half_period = 53;
+	integer idx;
 	event ser_sample;
 
 	initial begin
 		$dumpfile("testbench.vcd");
-		$dumpvars(0, testbench);
+		$dumpvars();
+		/* Dump cpu regs */
+		for (idx = 0; idx < 32; idx = idx + 1) begin
+      		$dumpvars(0, uut.soc.cpu.cpuregs.regs[idx]);
+    	end
+
+
+		/* Dump ram, 256 words */
+		for (idx = 0; idx < 256; idx = idx + 1) begin
+			$dumpvars(0, uut.soc.memory.mem[idx]);
+    	end
 
 		repeat (6) begin
 			repeat (50000) @(posedge clk);
@@ -70,7 +81,22 @@ module testbench;
 	) uut (
 		.clk      (clk      ),
 		.ledr_n   (ledr_n   ),
-		.ledg_n   (ledg_n   )
+		.ledg_n   (ledg_n   ),
+		.flash_csb(flash_csb),
+		.flash_clk(flash_clk),
+		.flash_io0(flash_io0),
+		.flash_io1(flash_io1),
+		.flash_io2(flash_io2),
+		.flash_io3(flash_io3)
+	);
+
+		spiflash spiflash (
+		.csb(flash_csb),
+		.clk(flash_clk),
+		.io0(flash_io0),
+		.io1(flash_io1),
+		.io2(flash_io2),
+		.io3(flash_io3)
 	);
 
 	reg [7:0] buffer;

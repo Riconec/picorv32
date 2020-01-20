@@ -12,6 +12,7 @@ module rom (clk, raddr, rdata);
     ram #(.RAM_DATA_WIDTH(32),
           .RAM_ADDR_WIDTH(8),
           .ROM_FILE_NAME(ROM_FILE_NAME))
+
     ram_inst1 (clk, 1'b0, 1'b1, 32'd0, raddr[RAM_ADDR_WIDTH+1:2], 32'd0, rdata);
 
 endmodule
@@ -27,7 +28,7 @@ module ram (clk, wen, ren, waddr, raddr, wdata, rdata);
     input [31:0] wdata;
     output reg [31:0] rdata;
     
-    reg [31:0] mem [0:255];
+    reg [31:0] mem [0:255]; //here use RAM_NUM_WORDS
 
 
 `ifdef INITIALIZE_RAM
