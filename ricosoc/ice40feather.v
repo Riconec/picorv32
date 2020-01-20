@@ -21,7 +21,7 @@
 `error "ice40feather.v must be read before picosoc.v!"
 `endif
 
-`define PICOSOC_MEM ice40up5k_spram
+//`define PICOSOC_MEM ice40up5k_spram
 //`define ICE40UP5K_SPLIT_SRAM_RAM_ROM
 
 module ice40feather (
