@@ -32,61 +32,9 @@
 // this macro can be used to check if the verilog files in your
 // design are read in the correct order.
 `define PICOSOC_V
+`include "defines.v"
 
 /* This part later will be transfered to separate include file */
-
-`define RICOSOC_RAM_START_ADDR          32'h0000_0000
-`define RICOSOC_RAM_END_ADDR            32'h0000_FFFF
-
-`define RICOSOC_EXECRAM_START_ADDR      32'h0001_0000
-`define RICOSOC_EXECRAM_END_ADDR        32'h0001_FFFF
-`define RICOSOC_INTRAM_END_ADDR         `RICOSOC_EXECRAM_END_ADDR
-
-`define RICOSOC_EXTRAM_START_ADDR       32'h0002_0000
-`define RICOSOC_EXTRAM_END_ADDR         32'h0081_FFFF
-
-`define RICOSOC_ROM_START_ADDR          32'h0100_0000
-`define RICOSOC_ROM_END_ADDR            32'h0100_FFFF
-`define RICOSOC_EXTFLASH_START_ADDR     32'h0101_0000
-`define RICOSOC_EXTFLASH_END_ADDR       32'h01FF_FFFF
-
-`define RICOSOC_PERIPH_START_ADDR       32'h0200_0000
-`define RICOSOC_PERIPH_END_ADDR         32'h02FF_FFFF
-`define RICOSOC_PERIPH_PAGE_SIZE        32'h0200_0100
-
-`define RICOSOC_UART0_PERIPH_NUM        0
-`define RICOSOC_UART0_BASE_ADDR         `RICOSOC_PERIPH_START_ADDR + (`RICOSOC_PERIPH_PAGE_SIZE * `RICOSOC_UART0_PERIPH_NUM)
-`define RICOSOC_UARTx_CLKDIV_ADDR       8'h00
-`define RICOSOC_UARTx_DATA_ADDR         8'h04
-
-`define RICOSOC_SPIEX_PERIPH_NUM        0
-`define RICOSOC_SPIEX_BASE_ADDR         `RICOSOC_PERIPH_START_ADDR + (`RICOSOC_PERIPH_PAGE_SIZE * `RICOSOC_SPIEX_PERIPH_NUM)
-`define RICOSOC_SPIEX_CFGREG_ADDR       8'h00
-
-`define RICOSOC_GPIO0_PERIPH_NUM        2
-`define RICOSOC_GPIO0_BASE_ADDR         `RICOSOC_PERIPH_START_ADDR + (`RICOSOC_GPIO0_PERIPH_NUM * `RICOSOC_UART0_PERIPH_NUM)
-`define RICOSOC_GPIO0_PERIPH_NUM        3
-`define RICOSOC_GPIO1_BASE_ADDR         `RICOSOC_PERIPH_START_ADDR + (`RICOSOC_GPIO0_PERIPH_NUM * `RICOSOC_UART0_PERIPH_NUM)
-`define RICOSOC_GPIOx_PORT_ADDR         8'h00
-`define RICOSOC_GPIOx_DDR_ADDR          8'h04
-`define RICOSOC_GPIOx_MODE_ADDR         8'h08
-
-
-`define UART0_CLKDIV_ADDR               (RICOSOC_UART0_BASE_ADDR + RICOSOC_UARTx_CLKDIV_ADDR)
-`define UART0_DATA_ADDR                 (RICOSOC_UART0_BASE_ADDR + RICOSOC_UARTx_DATA_ADDR)
-
-`define GPIO0_PORT_ADDR                 (RICOSOC_GPIO0_BASE_ADDR + RICOSOC_GPIOx_PORT_ADDR)
-`define GPIO0_DDR_ADDR                  (RICOSOC_GPIO0_BASE_ADDR + RICOSOC_GPIOx_DDR_ADDR)
-`define GPIO0_MODE_ADDR                 (RICOSOC_GPIO0_BASE_ADDR + RICOSOC_GPIOx_MODE_ADDR)
-
-`define GPIO1_PORT_ADDR                 (RICOSOC_GPIO1_BASE_ADDR + RICOSOC_GPIOx_PORT_ADDR)
-`define GPIO1_DDR_ADDR                  (RICOSOC_GPIO1_BASE_ADDR + RICOSOC_GPIOx_DDR_ADDR)
-`define GPIO1_MODE_ADDR                 (RICOSOC_GPIO1_BASE_ADDR + RICOSOC_GPIOx_MODE_ADDR)
-
-`define UART0_DATA_ADDR                 (RICOSOC_GPIO0_BASE_ADDR + RICOSOC_UARTx_CLKDIV_ADDR)
-
-
-
 module ricosoc (
 	input clk,
 	input resetn,
@@ -176,25 +124,12 @@ module ricosoc (
 	assign iomem_addr = mem_addr;
 	assign iomem_wdata = mem_wdata;
 
-    wire spimemio_cfgreg_sel = mem_valid && (mem_addr == (`RICOSOC_SPIEX_BASE_ADDR + `RICOSOC_SPIEX_CFGREG_ADDR));
+    wire spimemio_cfgreg_sel = mem_valid && (mem_addr == `RICOSOC_SPIEX_CFGREG_ADDR);
 	wire [31:0] spimemio_cfgreg_do;
-
-    // this won't work because it is in external address now :)
-    /*
-	wire        simpleuart_reg_div_sel = mem_valid && (mem_addr == 32'h 0200_0004);
-	wire [31:0] simpleuart_reg_div_do;
-
-	wire        simpleuart_reg_dat_sel = mem_valid && (mem_addr == 32'h 0200_0008);
-	wire [31:0] simpleuart_reg_dat_do;
-	wire        simpleuart_reg_dat_wait;
-    */
 
 	assign mem_ready = ram_ready  || rom_ready || (iomem_valid && iomem_ready) || spimemio_cfgreg_sel;
 
 	assign mem_rdata = ram_ready ? ram_rdata : rom_ready ? rom_rdata : spimemio_cfgreg_sel ? spimemio_cfgreg_do : (iomem_valid && iomem_ready) ? iomem_rdata : 32'h 0000_0000;
-	//assign mem_rdata = (iomem_valid && iomem_ready) ? iomem_rdata : ram_ready ? ram_rdata : rom_ready ? rom_rdata : 32'h 0000_0000;
-			//simpleuart_reg_div_sel ? simpleuart_reg_div_do :
-			//simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 32'h 0000_0000;
 
 	picorv32 #(
 		.STACKADDR(STACKADDR),
@@ -223,7 +158,7 @@ module ricosoc (
 	spimemio spimemio (
 		.clk    (clk),
 		.resetn (resetn),
-		.valid  (mem_valid && mem_addr >= 4*MEM_WORDS && mem_addr < 32'h 0200_0000),
+		.valid  (mem_valid && (mem_addr >= `RICOSOC_EXTFLASH_START_ADDR && mem_addr <= `RICOSOC_EXTFLASH_END_ADDR)),
 		.ready  (spimem_ready),
 		.addr   (mem_addr[23:0]),
 		.rdata  (spimem_rdata),
@@ -250,25 +185,7 @@ module ricosoc (
 		.cfgreg_di(mem_wdata),
 		.cfgreg_do(spimemio_cfgreg_do)
 	);
-/*
-	simpleuart simpleuart (
-		.clk         (clk         ),
-		.resetn      (resetn      ),
 
-		.ser_tx      (ser_tx      ),
-		.ser_rx      (ser_rx      ),
-
-		.reg_div_we  (simpleuart_reg_div_sel ? mem_wstrb : 4'b 0000),
-		.reg_div_di  (mem_wdata),
-		.reg_div_do  (simpleuart_reg_div_do),
-
-		.reg_dat_we  (simpleuart_reg_dat_sel ? mem_wstrb[0] : 1'b 0),
-		.reg_dat_re  (simpleuart_reg_dat_sel && !mem_wstrb),
-		.reg_dat_di  (mem_wdata),
-		.reg_dat_do  (simpleuart_reg_dat_do),
-		.reg_dat_wait(simpleuart_reg_dat_wait)
-	);
-*/
 	`PICOSOC_MEM #(
 		.WORDS(MEM_WORDS)
 	) memory (

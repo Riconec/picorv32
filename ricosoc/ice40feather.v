@@ -21,8 +21,7 @@
 `error "ice40feather.v must be read before picosoc.v!"
 `endif
 
-//`define PICOSOC_MEM ice40up5k_spram
-//`define ICE40UP5K_SPLIT_SRAM_RAM_ROM
+`include "defines.v"
 
 module ice40feather (
 	input clk,
@@ -61,11 +60,11 @@ module ice40feather (
 	assign ledb_n = !leds[3];
 
 	wire        iomem_valid;
-	reg         iomem_ready;
+	wire         iomem_ready;
 	wire [3:0]  iomem_wstrb;
 	wire [31:0] iomem_addr;
 	wire [31:0] iomem_wdata;
-	reg  [31:0] iomem_rdata;
+	wire  [31:0] iomem_rdata;
 
 	SB_IO #(
 		.PIN_TYPE(6'b 1010_01),
@@ -84,10 +83,11 @@ module ice40feather (
 		if (!resetn) begin
 			gpio <= 0;
 		end else begin
-			iomem_ready <= 0;
-			if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h 03) begin
-				iomem_ready <= 1;
-				iomem_rdata <= gpio;
+			//iomem_ready <= 0;
+			//if (iomem_valid && !iomem_ready && iomem_addr[31:24] == 8'h 03) begin
+			if (gpio_sel) begin
+				//iomem_ready <= 1;
+				//iomem_rdata <= gpio;
 				if (iomem_wstrb[0]) gpio[ 7: 0] <= iomem_wdata[ 7: 0];
 				if (iomem_wstrb[1]) gpio[15: 8] <= iomem_wdata[15: 8];
 				if (iomem_wstrb[2]) gpio[23:16] <= iomem_wdata[23:16];
@@ -133,4 +133,48 @@ module ice40feather (
 		.flash_io2_di (flash_io2_di),
 		.flash_io3_di (flash_io3_di)
 	);
+
+	wire ser_tx, ser_rx;
+
+	wire gpio_sel = (iomem_addr == `GPIO0_PORT_ADDR);
+
+	wire        simpleuart_reg_div_sel = (iomem_addr == `UART0_CLKDIV_ADDR);
+	wire [31:0] simpleuart_reg_div_do;
+
+	wire        simpleuart_reg_dat_sel = (iomem_addr == `UART0_DATA_ADDR);
+	wire [31:0] simpleuart_reg_dat_do;
+	wire        simpleuart_reg_dat_wait;
+
+	assign iomem_ready = simpleuart_reg_div_sel 
+						 || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait)
+						 || gpio_sel;
+
+	assign iomem_rdata = simpleuart_reg_div_sel ? simpleuart_reg_div_do : 
+						 simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 
+						 gpio_sel ? gpio :
+						 32'h0000_0000;
+
+	
+
+
+	simpleuart simpleuart (
+		.clk         (clk         ),
+		.resetn      (resetn      ),
+
+		.ser_tx      (ser_tx      ),
+		.ser_rx      (ser_rx      ),
+
+		.reg_div_we  (simpleuart_reg_div_sel ? iomem_wstrb : 4'b 0000),
+		.reg_div_di  (iomem_wdata),
+		.reg_div_do  (simpleuart_reg_div_do),
+
+		.reg_dat_we  (simpleuart_reg_dat_sel ? iomem_wstrb[0] : 1'b 0),
+		.reg_dat_re  (simpleuart_reg_dat_sel && !iomem_wstrb),
+		.reg_dat_di  (iomem_wdata),
+		.reg_dat_do  (simpleuart_reg_dat_do),
+		.reg_dat_wait(simpleuart_reg_dat_wait)
+	);
+
+
+
 endmodule

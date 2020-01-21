@@ -13,6 +13,7 @@ MEMORY
 {
     ROM (rx)        : ORIGIN = 0x01000000, LENGTH = ROM_SIZE /* entire ROM, 4 MiB */
     RAM (xrw)       : ORIGIN = 0x00000000, LENGTH = MEM_TOTAL
+    EXRAM (xrw)     : ORIGIN = 0x00000000+MEM_TOTAL, LENGTH = MEM_TOTAL
 }
 
 SECTIONS {

@@ -1,6 +1,6 @@
 CROSS=riscv32-unknown-elf-
 CFLAGS=
-SRC_LIST= ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ../picosoc/spimemio.v ricosoc.v ../picorv32.v
+SRC_LIST= defines.v ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ../picosoc/spimemio.v ricosoc.v ../picorv32.v
 
 # ---- iCE40 Feather Board ----
 
@@ -51,8 +51,8 @@ ice40feather_fw.hex: ice40feather_fw.elf
 	cp ice40feather_fw.hex firmware.hex
 
 ice40feather_fw.lss: ice40feather_fw.elf
-	$(CROSS)objdump -S ice40feather_fw.elf >> ice40feather_fw.lss
-	$(CROSS)objdump -t ice40feather_fw.elf >> ice40feather_fw.map
+	$(CROSS)objdump -S ice40feather_fw.elf > ice40feather_fw.lss
+	$(CROSS)objdump -t ice40feather_fw.elf > ice40feather_fw.map
 
 ice40feather_fw.bin: ice40feather_fw.elf ice40feather_fw.lss
 	$(CROSS)objcopy -O binary ice40feather_fw.elf ice40feather_fw.bin
@@ -64,10 +64,10 @@ bootloader_fw.elf: ice40feather_sections.lds bootrom.s
 
 bootloader_fw.hex: bootloader_fw.elf
 	elf2hex --bit-width 32 --input bootloader_fw.elf --output bootloader_fw.hex
-	$(CROSS)objdump -S bootloader_fw.elf >> bootloader_fw.lss
+	$(CROSS)objdump -S bootloader_fw.elf > bootloader_fw.lss
 
 bootloader_fw.lss: bootloader_fw.elf
-	$(CROSS)objdump -S bootloader_fw.elf >> bootloader_fw.lss
+	$(CROSS)objdump -S bootloader_fw.elf > bootloader_fw.lss
 
 # bootloader debug part
 
@@ -93,6 +93,6 @@ bootloader_ram_tb.vvp: bootloader_ram_tb.v bootloader_ram.v
 	iverilog -s rom_tb -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
 
 clean:
-	rm -f ice40feather_fw.elf ice40feather_fw.hex ice40feather_fw.lss ice40feather_sections.lds ice40feather_tb.vvp
-	rm -f bootloader_fw.elf bootloader_fw.hex bootloader_fw.lss
+	rm -f ice40feather_fw.elf ice40feather_fw.hex ice40feather_fw.lss ice40feather_sections.lds ice40feather_fw.map ice40feather_tb.vvp
+	rm -f bootloader_fw.elf bootloader_fw.hex bootloader_fw.lss firmware.hex
 	rm -f ice40feather.bin ice40feather.asc ice40feather.json ice40feather.log ice40feather.rpt
