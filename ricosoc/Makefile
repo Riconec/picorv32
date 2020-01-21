@@ -47,11 +47,12 @@ ice40feather_fw.elf: ice40feather_sections.lds start.s main.c#rom_boot.s firmwar
 	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32i -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s main.c 
 
 ice40feather_fw.hex: ice40feather_fw.elf
-	$(CROSS)objcopy -O verilog ice40feather_fw.elf ice40feather_fw.hex
+	elf2hex --bit-width 32 --input ice40feather_fw.elf --output ice40feather_fw.hex
 	cp ice40feather_fw.hex firmware.hex
 
 ice40feather_fw.lss: ice40feather_fw.elf
 	$(CROSS)objdump -S ice40feather_fw.elf >> ice40feather_fw.lss
+	$(CROSS)objdump -t ice40feather_fw.elf >> ice40feather_fw.map
 
 ice40feather_fw.bin: ice40feather_fw.elf ice40feather_fw.lss
 	$(CROSS)objcopy -O binary ice40feather_fw.elf ice40feather_fw.bin

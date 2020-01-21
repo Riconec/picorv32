@@ -280,8 +280,8 @@ module ricosoc (
 	);
 
     rom #(
-        .ROM_FILE_NAME("bootloader_fw.hex"),
-        .RAM_ADDR_WIDTH(8)
+        .ROM_FILE_NAME("ice40feather_fw.hex"),
+        .RAM_ADDR_WIDTH(11)
     ) bootrom (
         .clk(clk), 
         .raddr(mem_addr),

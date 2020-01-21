@@ -3,15 +3,15 @@
 #elif HX8KDEMO
 #  define MEM_TOTAL 0x200 /* 2 KB */
 #elif ICE40FEATHER
-#  define MEM_TOTAL 0x20000 /* 128 KB */
-#  define ROM_SIZE 1024
+#  define MEM_TOTAL 0x10000 /* 64 KB */
+#  define ROM_SIZE 2048
 #else
 #  error "Set -DICEBREAKER or -DHX8KDEMO or even ICE40FEATHER when compiling firmware.c"
 #endif
 
 MEMORY
 {
-    ROM (rx)      : ORIGIN = 0x00100000, LENGTH = 0x400000 /* entire ROM, 4 MiB */
+    ROM (rx)        : ORIGIN = 0x01000000, LENGTH = ROM_SIZE /* entire ROM, 4 MiB */
     RAM (xrw)       : ORIGIN = 0x00000000, LENGTH = MEM_TOTAL
 }
 
