@@ -1,6 +1,6 @@
 CROSS=riscv32-unknown-elf-
 CFLAGS=
-SRC_LIST= defines.v ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ../picosoc/spimemio.v ricosoc.v ../picorv32.v
+SRC_LIST= defines.v ice40feather.v bootloader_ram.v ../picosoc/ice40up5k_spram.v ../picosoc/simpleuart.v ../picosoc/spimemio.v ricosoc.v ../picorv32.v ice_gpio.v
 
 # ---- iCE40 Feather Board ----
 
@@ -44,7 +44,7 @@ ice40feather_sections.lds: sections.lds
 	$(CROSS)cpp -P -DICE40FEATHER -o $@ $^
 
 ice40feather_fw.elf: ice40feather_sections.lds start.s main.c#rom_boot.s firmware_feather.c #rom_boot.s firmware_feather.c
-	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32i -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s main.c 
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o ice40feather_fw.elf start.s main.c 
 
 ice40feather_fw.hex: ice40feather_fw.elf
 	elf2hex --bit-width 32 --input ice40feather_fw.elf --output ice40feather_fw.hex
@@ -60,7 +60,7 @@ ice40feather_fw.bin: ice40feather_fw.elf ice40feather_fw.lss
 # bootloader fw part
 
 bootloader_fw.elf: ice40feather_sections.lds bootrom.s
-	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32i -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o bootloader_fw.elf bootrom.s
+	$(CROSS)gcc $(CFLAGS) -DICE40FEATHER -march=rv32ic -Wl,-Bstatic,-T,ice40feather_sections.lds,--strip-debug -ffreestanding -nostdlib -o bootloader_fw.elf bootrom.s
 
 bootloader_fw.hex: bootloader_fw.elf
 	elf2hex --bit-width 32 --input bootloader_fw.elf --output bootloader_fw.hex

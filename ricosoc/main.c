@@ -1,10 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
-
-#define reg_spictrl (*(volatile uint32_t*)0x02000100)
-#define reg_uart_clkdiv (*(volatile uint32_t*)0x02000000)
-#define reg_uart_data (*(volatile uint32_t*)0x02000004)
-#define reg_gpio (*(volatile uint32_t*)0x02000200)
+#include "ice40feather_def.h"
 
 uint32_t defaultVar = 0xDEADBEEFu;
 uint32_t testVar0;
@@ -17,19 +13,25 @@ void main(void) {
 
     uint32_t ptr = 0u;
 	reg_uart_clkdiv = 104;
-    reg_gpio = 1;
-
+    //reg_gpio = 1;
+/*
     while(testString[ptr]) {
         testArray[ptr] = testString[ptr];
         reg_uart_data = testString[ptr];
         ptr++;
     }
+*/
+    reg_gpio0_odr = 0x0u;
+    reg_gpio0_idr = 0;
+    reg_gpio0_ddr = 0;
+    reg_gpio0_mode = 0;
 
-    reg_gpio = 0xFFFFFFFFu;
+    reg_gpio0_ddr = 3;
+    reg_gpio0_odr = 3;
 
     while(1) {
         defaultVar++;
-        reg_spictrl = defaultVar;
-        reg_gpio = defaultVar;
+        //reg_spictrl = defaultVar;
+        //reg_gpio = defaultVar;
     }
 }

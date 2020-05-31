@@ -32,13 +32,28 @@ module ice40feather (
 	output ledg_n,
 	output ledb_n,
 
-
 	output flash_csb,
 	output flash_clk,
 	inout  flash_io0,
 	inout  flash_io1,
 	inout  flash_io2,
-	inout  flash_io3
+	inout  flash_io3,
+	inout  gpio0_pin0,
+	inout  gpio0_pin1,
+	inout  gpio0_pin2,
+	inout  gpio0_pin3,
+	inout  gpio0_pin4,
+	inout  gpio0_pin5,
+	inout  gpio0_pin6,
+	inout  gpio0_pin7,
+	inout  gpio0_pin8,
+	inout  gpio0_pin9,
+	inout  gpio0_pin10,
+	inout  gpio0_pin11,
+	inout  gpio0_pin12,
+	inout  gpio0_pin13,
+	inout  gpio0_pin14,
+	inout  gpio0_pin15
 
 );
 	parameter integer MEM_WORDS = 32768;
@@ -76,6 +91,7 @@ module ice40feather (
 		.D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
 	);
 
+/*
 	reg [31:0] gpio;
 	assign leds = gpio;
 
@@ -95,7 +111,7 @@ module ice40feather (
 			end
 		end
 	end
-
+*/
 	ricosoc #(
 		.BARREL_SHIFTER(0),
 		.ENABLE_MULDIV(0),
@@ -134,9 +150,51 @@ module ice40feather (
 		.flash_io3_di (flash_io3_di)
 	);
 
-	wire ser_tx, ser_rx;
+	wire gpio0_ready;
+	wire [31:0] gpio0_rdata;
 
-	wire gpio_sel = (iomem_addr == `GPIO0_PORT_ADDR);
+	wire [15:0] alt_cpu_in;
+	wire [15:0] alt_cpu_out;
+
+	wire [15:0] i_alt_fpga_in;
+	wire [15:0] i_alt_fpga_out;
+
+
+	ice_gpio #(
+		.PARAM_GPIO_ODR_ADDR(`GPIO0_ODR_ADDR),
+		.PARAM_GPIO_IDR_ADDR(`GPIO0_IDR_ADDR),
+		.PARAM_GPIO_DDR_ADDR(`GPIO0_DDR_ADDR),
+		.PARAM_GPIO_MODE_ADDR(`GPIO0_MODE_ADDR)
+	) gpio0_inst (
+		.i_clk(clk), 
+		.i_rst_n(resetn),
+    	.io_memaddr(iomem_addr),
+		.io_wdata(iomem_wdata),
+		.io_wstrb(iomem_wstrb),
+		.io_valid(iomem_valid),
+		.io_rdata(gpio0_rdata),
+		.io_ready(gpio0_ready),
+    	.i_alt_cpu_in(16'd0),
+    	.i_alt_fpga_in(16'd0),
+    	.i_alt_cpu_out(),
+    	.i_alt_fpga_out(),
+    	.gpio({gpio0_pin15,
+			   gpio0_pin14,
+			   gpio0_pin13,
+			   gpio0_pin12,
+			   gpio0_pin11,
+			   gpio0_pin10,
+			   gpio0_pin9,
+			   gpio0_pin8,
+			   gpio0_pin7,
+			   gpio0_pin6,
+			   gpio0_pin5,
+			   gpio0_pin4,
+			   gpio0_pin3,
+			   gpio0_pin2,
+			   gpio0_pin1,
+			   gpio0_pin0})
+	);
 
 	wire        simpleuart_reg_div_sel = (iomem_addr == `UART0_CLKDIV_ADDR);
 	wire [31:0] simpleuart_reg_div_do;
@@ -147,15 +205,15 @@ module ice40feather (
 
 	assign iomem_ready = simpleuart_reg_div_sel 
 						 || (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait)
-						 || gpio_sel;
+						 || gpio0_ready;
 
 	assign iomem_rdata = simpleuart_reg_div_sel ? simpleuart_reg_div_do : 
 						 simpleuart_reg_dat_sel ? simpleuart_reg_dat_do : 
-						 gpio_sel ? gpio :
+						 gpio0_ready ? gpio0_rdata :
 						 32'h0000_0000;
 
-	
 
+	wire ser_tx, ser_rx;
 
 	simpleuart simpleuart (
 		.clk         (clk         ),

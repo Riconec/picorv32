@@ -3,6 +3,12 @@
 start:
 
 # zero-initialize register file
+c.lui x1, 10
+c.nop
+c.lui x3, 20
+c.addi x2, 5
+c.add x2, x3
+
 addi x1, zero, 0
 # x2 (sp) is initialized by reset
 addi x3, zero, 0

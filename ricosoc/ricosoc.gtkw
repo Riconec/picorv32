@@ -1,21 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
-[*] Tue Jan 21 23:24:32 2020
+[*] Sun May 31 19:52:44 2020
 [*]
 [dumpfile] "/home/rico/project/picorv32/ricosoc/testbench.vcd"
-[dumpfile_mtime] "Tue Jan 21 23:23:21 2020"
-[dumpfile_size] 30520127
+[dumpfile_mtime] "Sun May 31 19:51:08 2020"
+[dumpfile_size] 167065545
 [savefile] "/home/rico/project/picorv32/ricosoc/ricosoc.gtkw"
-[timestart] 1130000
+[timestart] 506500
 [size] 1920 1014
 [pos] -1 -1
-*-21.000000 4590000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.000000 650000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] testbench.
 [treeopen] testbench.uut.
 [treeopen] testbench.uut.soc.
+[treeopen] testbench.uut.soc.bootrom.
 [treeopen] testbench.uut.soc.cpu.
 [treeopen] testbench.uut.soc.spimemio.
-[sst_width] 207
+[sst_width] 273
 [signals_width] 295
 [sst_expanded] 1
 [sst_vpaned_height] 294
@@ -27,9 +28,50 @@ testbench.uut.flash_io0
 testbench.uut.flash_io1
 testbench.uut.flash_io2
 testbench.uut.flash_io3
+@200
+-
 @22
 testbench.uut.soc.cpu.reg_pc[31:0]
 testbench.uut.soc.mem_addr[31:0]
+@28
+testbench.uut.gpio0_inst.gpio_io_buf[0].CLOCK_ENABLE
+testbench.uut.gpio0_inst.gpio_io_buf[0].D_IN_0
+testbench.uut.gpio0_inst.gpio_io_buf[0].D_IN_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].D_OUT_0
+testbench.uut.gpio0_inst.gpio_io_buf[0].D_OUT_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].INPUT_CLK
+testbench.uut.gpio0_inst.gpio_io_buf[0].LATCH_INPUT_VALUE
+testbench.uut.gpio0_inst.gpio_io_buf[0].OUTPUT_CLK
+testbench.uut.gpio0_inst.gpio_io_buf[0].OUTPUT_ENABLE
+testbench.uut.gpio0_inst.gpio_io_buf[0].PACKAGE_PIN
+testbench.uut.gpio0_inst.gpio_io_buf[0].clken_pulled
+testbench.uut.gpio0_inst.gpio_io_buf[0].clken_pulled_ri
+testbench.uut.gpio0_inst.gpio_io_buf[0].clken_pulled_ro
+testbench.uut.gpio0_inst.gpio_io_buf[0].din_0
+testbench.uut.gpio0_inst.gpio_io_buf[0].din_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].din_q_0
+testbench.uut.gpio0_inst.gpio0_pin0
+@22
+testbench.uut.gpio0_inst.gpio[15:0]
+testbench.uut.gpio0_inst.gpio_ddr[16:0]
+testbench.uut.gpio0_inst.gpio_idr[16:0]
+testbench.uut.gpio0_inst.gpio_mode[31:0]
+@28
+testbench.uut.gpio0_inst.gpio_idr_wire[16:0]
+testbench.uut.gpio0_inst.gpio_io_buf[0].din_q_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].dout
+testbench.uut.gpio0_inst.gpio_io_buf[0].dout_q_0
+testbench.uut.gpio0_inst.gpio_io_buf[0].dout_q_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].outclk_delayed_1
+testbench.uut.gpio0_inst.gpio_io_buf[0].outclk_delayed_2
+testbench.uut.gpio0_inst.gpio_io_buf[0].outena_q
+@22
+testbench.uut.soc.cpu.reg_pc[31:0]
+testbench.uut.soc.bootrom.ram_inst1.raddr[10:0]
+@29
+testbench.uut.soc.bootrom.ram_inst1.ren
+@22
+testbench.uut.soc.bootrom.ram_inst1.rdata[31:0]
 @28
 testbench.uut.soc.mem_instr
 testbench.uut.soc.mem_ready
@@ -44,7 +86,6 @@ testbench.uut.soc.rom_rdata[31:0]
 testbench.uut.soc.spimem_rdata[31:0]
 testbench.uut.soc.mem_wdata[31:0]
 testbench.uut.soc.mem_wstrb[3:0]
-testbench.uut.gpio[31:0]
 @28
 testbench.uut.simpleuart.ser_tx
 @22
